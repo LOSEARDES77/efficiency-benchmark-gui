@@ -1,0 +1,24 @@
+[package]
+name = "efficiency-benchmark-gui"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+efficiency-benchmark = "0.2.5"
+battery = "0.7.8"
+sysinfo = "0.30.8"
+tauri = { version = "1.6.1", features = ["shell-open"] }
+chrono = "0.4.37"
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = []
