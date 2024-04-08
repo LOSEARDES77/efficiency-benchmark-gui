@@ -18,7 +18,7 @@ export default function Eta() {
 
   return (
     <div className="container eta">
-      <h2>Estimated Bench Time</h2>
+      <h2>Estimated Time</h2>
       <div className="eta-usage">
         ETA: {eta}
       </div>

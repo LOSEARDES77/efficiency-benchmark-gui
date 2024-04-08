@@ -1,3 +1,24 @@
 .container.stdout {
     grid-area: out;
 }
+.output {
+    width: 80%;
+    height: 80%;
+    background-color: rgba(12, 12, 12, 0.692);
+    margin-bottom: 20px;
+    border: 3px solid #c7c7c7;
+    border-radius: 10px;
+    display: block;
+    text-align: left;
+    overflow-y: scroll;
+    overflow-y: scroll;
+    font-family: monospace;
+    div {
+        margin: 15px;
+        white-space: pre-wrap; /* Allow line breaks without removing spaces */
+        border: none; /* Remove default border */
+        background-color: inherit; /* Inherit background color */
+        color: inherit; /* Inherit text color */
+        font-family: inherit; /* Inherit font family */
+    }
+}
