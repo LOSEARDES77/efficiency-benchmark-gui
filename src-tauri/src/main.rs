@@ -2,12 +2,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    env::set_current_dir, fs::{copy, create_dir_all, metadata, read_dir, remove_dir_all, remove_file, File}, io::{BufRead, BufReader, Write}, process::{Command, Stdio}, sync::mpsc::{channel, Receiver, Sender}, thread::{self, sleep}, time::Duration
+    env::set_current_dir, 
+    fs::{copy, create_dir_all, metadata, read_dir, remove_dir_all, remove_file, File}, 
+    io::{BufRead, BufReader, Write}, 
+    process::{Command, Stdio}, 
+    sync::mpsc::{channel, Receiver, Sender}, 
+    thread::{self, sleep}, 
+    time::Duration
 };
 
 use efficiency_benchmark::{get_battery_percentage, get_highest_score, get_latest_score, is_plugged};
 use battery::units::time::second;
-use tauri::{Runtime, Window};
+use tauri::{AppHandle, Manager, Runtime, Window};
 use chrono::Local;
 use git2::Repository;
 
@@ -162,17 +168,21 @@ fn savesettings(repo_url: &str, build_cmd: &str, override_repo: bool) -> bool {
 }
 
 #[tauri::command]
-async fn runbench<R: Runtime>(window: Window<R>, repo_url: String, build_cmd: String, repo_exists: bool) -> Result<(), String> {
+async fn runbench<R: Runtime>(app: AppHandle<R>, window: Window<R>, repo_url: String, build_cmd: String, repo_exists: bool) -> Result<(), String> {
     let app_dir = std::env::var("EFFICIENCY_BENCHMARK_GUI_APP_DIR").expect("Failed to get app directory");
     let source_dir = format!("{}/repo-dir", app_dir);
     let build_dir = format!("{}/build-dir", app_dir);
-    let output = bench(&repo_url, &build_cmd, &source_dir, &build_dir, repo_exists);
+    let output = bench(&repo_url, &build_cmd, &source_dir, &build_dir, repo_exists, app);
     window.emit("build-output", "Building project once").expect("Failed to emit build output");
     thread::spawn(move || {
         let mut counter = 0;
+        let mut prev_line = "".to_string();
         for line in output {
-            counter += 1;
-            window.emit("build-output", format!("{} | {}", counter, line)).expect("Failed to emit build output");
+            if line != prev_line {
+                counter += 1;
+                window.emit("build-output", format!("{} | {}", counter, line)).expect("Failed to emit build output");
+                prev_line = line;
+            }
         };
     });
 
@@ -218,7 +228,7 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-pub fn bench(repo_url: &str, build_command: &str, source_dir: &str, build_dir: &str, repo_exists: bool) -> impl Iterator<Item = String>{
+pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, build_dir: &str, repo_exists: bool, app: AppHandle<R>) -> impl Iterator<Item = String>{
     let (sender, receiver): (Sender<String>, Receiver<String>) = channel();
     let repo_url = repo_url.to_owned();
     let build_command = build_command.to_owned();
@@ -258,8 +268,19 @@ pub fn bench(repo_url: &str, build_command: &str, source_dir: &str, build_dir: &
         if metadata(logfile).is_ok() {
             remove_file(logfile).unwrap();
         }
-        
+
+        let (tx, rx) : (Sender<()>, Receiver<()>) = channel();
+
+        app.listen_global("stopbench", move|_| {
+           tx.send(()).unwrap();
+        });
+
         loop {
+
+            if rx.try_recv().is_ok() {
+                break;
+            }
+            
             // Copy build dir
             sender.send("Copying repo".to_string()).unwrap();
             copy_dir(&source_dir, &build_dir).unwrap();

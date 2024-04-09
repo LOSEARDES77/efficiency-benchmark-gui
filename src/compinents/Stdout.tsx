@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { appWindow } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/tauri';
+import { emit } from '@tauri-apps/api/event';
 
 export default function Stdout() {
   const [output, setOutput] = useState('');
@@ -20,9 +21,20 @@ export default function Stdout() {
     invoke('runbench', { repoUrl: repo_url, buildCmd: build_cmd, repoExists: !override_repo });
   };
 
+  const stopBenchmark = () => {
+    console.log('Stopping benchmark');
+    emit('stopbench')
+  }
+
 
   appWindow.listen<string>('build-output', (event) => {
-    setOutput((prevOutput) => prevOutput + '\n' + event.payload);
+    let arr = output.split('\n');
+    console.log('Array:', arr)
+    console.log('Output:', event.payload);
+    console.log('Includes:', arr.includes(event.payload));
+    if (!arr.includes(event.payload)) {
+      setOutput((prevOutput) => prevOutput + '\n' + event.payload);
+    }
   });
   return (
     <div className='container stdout'>
@@ -32,6 +44,7 @@ export default function Stdout() {
       </div>
 
       <Button variant="outlined" onClick={runBenchmark}>Run benchmark</Button>
+      <Button variant="outlined" onClick={stopBenchmark}>Stop benchmark</Button>
     </div>
   );
 }
