@@ -1,10 +1,9 @@
-import "./App.css";
-import Battery from "./compinents/Battery";
-import Cpu from "./compinents/Cpu";
-import Eta from "./compinents/Eta";
-import Score from "./compinents/Score";
-import Settings from "./compinents/Settings";
-import Stdout from "./compinents/Stdout";
+import Battery from "./components/battery";
+import Cpu from "./components/cpu";
+import Eta from "./components/eta";
+import Score from "./components/score";
+import Settings from "./components/settings";
+import Stdout from "./components/stdout";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -24,9 +23,10 @@ function App() {
       <Battery />
       <Settings />
       <Stdout />
-
     </ThemeProvider>
   );
 }
 
 export default App;
+
+

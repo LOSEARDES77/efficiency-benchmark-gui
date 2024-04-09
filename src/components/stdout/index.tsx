@@ -1,9 +1,10 @@
-import './Stdout.css';
-import { repo_url, build_cmd, override_repo } from './Settings';
+import './styles.css';
 import { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import { appWindow } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/tauri';
+import { appWindow } from '@tauri-apps/api/window';
+import Button from '@mui/material/Button';
+
+import { repo_url, build_cmd, override_repo } from '../settings';
 
 export default function Stdout() {
   const [output, setOutput] = useState('');

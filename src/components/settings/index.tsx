@@ -1,9 +1,9 @@
+import './styles.css';
+import { invoke } from '@tauri-apps/api/tauri';
 import TextField from '@mui/material/TextField'
-import './Settings.css'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Button from '@mui/material/Button';
-import { invoke } from '@tauri-apps/api/tauri';
 
 let repo_url = '';
 let build_cmd = '';

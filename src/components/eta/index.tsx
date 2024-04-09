@@ -1,5 +1,5 @@
+import './styles.css';
 import { useEffect, useState } from "react";
-import "./Eta.css";
 import { invoke } from "@tauri-apps/api/tauri";
 
 export default function Eta() {

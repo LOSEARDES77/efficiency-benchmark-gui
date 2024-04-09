@@ -1,6 +1,6 @@
-import { invoke } from '@tauri-apps/api/tauri'
-import './Cpu.css'
+import './styles.css';
 import { useEffect, useState } from 'react'
+import { invoke } from '@tauri-apps/api/tauri'
 
 export default function Cpu() {
   const [cpu, setCpu] = useState(2)

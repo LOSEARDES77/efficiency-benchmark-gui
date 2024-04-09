@@ -1,5 +1,5 @@
+import './styles.css';
 import { useState } from 'react';
-import './Score.css';
 import { invoke } from '@tauri-apps/api/tauri';
 
 export default function Score() {
