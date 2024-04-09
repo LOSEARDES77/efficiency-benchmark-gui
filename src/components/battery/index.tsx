@@ -1,6 +1,6 @@
 import './styles.css';
-import { invoke } from '@tauri-apps/api/tauri';
 import { useEffect, useState } from 'react'
+import { invoke } from '@tauri-apps/api/tauri';
 
 
 export default function Battery() {
