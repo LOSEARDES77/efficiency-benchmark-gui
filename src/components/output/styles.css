@@ -1,6 +1,23 @@
 .container.stdout {
     grid-area: out;
 }
+
+
+::-webkit-scrollbar {
+    width: 10px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c8c8c8; 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb::hover {
+    background: #989898;
+}
+
+
 .output {
     width: 80%;
     height: 80%;
@@ -11,15 +28,15 @@
     display: block;
     text-align: left;
     overflow-y: scroll;
-    overflow-y: scroll;
     font-family: monospace;
+    scroll-behavior: smooth;
     div {
-        margin: 15px;
-        white-space: pre-wrap; /* Allow line breaks without removing spaces */
-        border: none; /* Remove default border */
-        background-color: inherit; /* Inherit background color */
-        color: inherit; /* Inherit text color */
-        font-family: inherit; /* Inherit font family */
+        margin: 8px;
+        white-space: pre-wrap;
+        border: none; 
+        background-color: inherit;
+        color: inherit; 
+        font-family: inherit;
     }
 }
 

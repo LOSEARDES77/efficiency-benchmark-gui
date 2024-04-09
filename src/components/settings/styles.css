@@ -12,3 +12,8 @@
     margin: 10px;
   };
 }
+
+input[type="text"], input[type="url"] {
+  width: 20rem;
+  text-align: center;
+}

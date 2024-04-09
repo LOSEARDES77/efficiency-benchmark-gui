@@ -166,14 +166,14 @@ fn savesettings(repo_url: &str, build_cmd: &str, override_repo: bool) -> bool {
         Err(_) => return false
     }
 }
-
+// MARK: - RUN BENCH
 #[tauri::command]
 async fn runbench<R: Runtime>(app: AppHandle<R>, window: Window<R>, repo_url: String, build_cmd: String, repo_exists: bool) -> Result<(), String> {
     let app_dir = std::env::var("EFFICIENCY_BENCHMARK_GUI_APP_DIR").expect("Failed to get app directory");
     let source_dir = format!("{}/repo-dir", app_dir);
     let build_dir = format!("{}/build-dir", app_dir);
-    let output = bench(&repo_url, &build_cmd, &source_dir, &build_dir, repo_exists, app);
-    window.emit("build-output", "Building project once").expect("Failed to emit build output");
+    let output = bench(&repo_url, &build_cmd, &source_dir, &build_dir, !repo_exists, app);
+    window.emit("build-output", "Running benchmark").expect("Failed to emit build output");
     thread::spawn(move || {
         let mut prev_line = "".to_string();
         for line in output {
@@ -213,9 +213,9 @@ async fn eta() -> String {
     return "∞".to_string();
 }
 
-
+// MARK: - MAIN
 fn main() {
-  std::env::set_var("CARGO_PKG_NAME", "efficiency-benchmark-gui");
+    std::env::set_var("CARGO_PKG_NAME", "efficiency-benchmark-gui");
     tauri::Builder::default()
         .setup(|app| {
             let app_dir = app.path_resolver().app_local_data_dir().expect("Failed to get app directory");
@@ -227,13 +227,22 @@ fn main() {
         .expect("error while running tauri application");
 }
 
+// MARK: - Bench-start
 pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, build_dir: &str, repo_exists: bool, app: AppHandle<R>) -> impl Iterator<Item = String>{
     let (sender, receiver): (Sender<String>, Receiver<String>) = channel();
     let repo_url = repo_url.to_owned();
     let build_command = build_command.to_owned();
     let source_dir = source_dir.to_owned();
     let build_dir = build_dir.to_owned();
+    
     thread::spawn(move || {
+
+        let (tx, rx) : (Sender<()>, Receiver<()>) = channel();
+    
+        let listener = app.listen_global("stopbench", move|_| {
+            tx.send(()).unwrap();
+        });
+
         if !repo_exists {
             if metadata(&source_dir).is_ok() {
                 remove_dir_all(&source_dir).unwrap();
@@ -252,7 +261,7 @@ pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, 
         }
     
         
-        if is_plugged(false) {
+        if is_plugged(true) {
             sender.send("Please unplug the system to start the benchmarking".to_string()).unwrap();
             loop {
                 if !is_plugged(true){
@@ -268,12 +277,6 @@ pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, 
             remove_file(logfile).unwrap();
         }
 
-        let (tx, rx) : (Sender<()>, Receiver<()>) = channel();
-
-        let listener = app.listen_global("stopbench", move|_| {
-            println!("Received stopbench");
-            tx.send(()).unwrap();
-        });
 
         loop {
 
@@ -288,6 +291,10 @@ pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, 
     
             set_current_dir(&build_dir).unwrap();
             
+            if rx.try_recv().is_ok() {
+                app.unlisten(listener);
+                break;
+            }
             // Build
             sender.send("Building".to_string()).unwrap();
             
@@ -300,19 +307,26 @@ pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, 
                 .stderr(Stdio::piped())
                 .spawn()
                 .expect("failed to build repository");
-
+            let mut sig_recived = false;
             let reader = BufReader::new(process.stderr.take().expect("failed to get stdout"));
             for line in reader.lines() {
                 match line {
                     Ok(line) => {
+                        if rx.try_recv().is_ok() {
+                            app.unlisten(listener);
+                            process.kill().unwrap();
+                            sig_recived = true;
+                            break;
+                        }
                         sender.send(line.clone()).unwrap();
                     },
                     Err(_) => {},
                 }
             }
-            process.wait().unwrap();
 
-            
+            if sig_recived {
+                break;
+            }
             
             // Delete build dir
             set_current_dir("..").unwrap();

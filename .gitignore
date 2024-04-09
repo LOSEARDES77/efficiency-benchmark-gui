@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 bun.lockb
 package-lock.json
+.hintrc
+src-tauri/icons/old-icon.ico

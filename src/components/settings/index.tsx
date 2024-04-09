@@ -26,6 +26,7 @@ export default function Settings() {
     (getElementByXpath("//*[@id=\"outlined-basic repo-url\"]") as HTMLInputElement).value = repoUrl;
     (getElementByXpath('//*[@id="outlined-basic build-cmd"]') as HTMLInputElement).value = buildCmd;
     (getElementByXpath('//*[@id="override-repo"]') as HTMLInputElement).checked = overrideRepo;
+
     saveConfig();
   } 
   loadConfig();
@@ -61,7 +62,7 @@ export default function Settings() {
       <form id='settings-form'>
         <TextField id="outlined-basic repo-url" label="Repository URL" type='url' variant="outlined" />
         <TextField id="outlined-basic build-cmd" label="Build Command" variant="outlined" />
-        <FormControlLabel control={<Checkbox id='override-repo' defaultChecked />} label="Override Repository" />
+        <FormControlLabel control={<Checkbox id='override-repo' />} label="Override Repository" />
         
         <Button variant="outlined" onClick={saveConfig}>Save config</Button>
       </form>

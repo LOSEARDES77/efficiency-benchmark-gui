@@ -3,7 +3,7 @@ import Cpu from "./components/cpu";
 import Eta from "./components/eta";
 import Score from "./components/score";
 import Settings from "./components/settings";
-import Stdout from "./components/stdout";
+import Stdout from "./components/output";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
