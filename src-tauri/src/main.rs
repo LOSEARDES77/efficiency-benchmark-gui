@@ -175,12 +175,11 @@ async fn runbench<R: Runtime>(app: AppHandle<R>, window: Window<R>, repo_url: St
     let output = bench(&repo_url, &build_cmd, &source_dir, &build_dir, repo_exists, app);
     window.emit("build-output", "Building project once").expect("Failed to emit build output");
     thread::spawn(move || {
-        let mut counter = 0;
         let mut prev_line = "".to_string();
         for line in output {
             if line != prev_line {
-                counter += 1;
-                window.emit("build-output", format!("{} | {}", counter, line)).expect("Failed to emit build output");
+
+                window.emit("build-output", format!("{}", line)).expect("Failed to emit build output");
                 prev_line = line;
             }
         };
@@ -271,13 +270,15 @@ pub fn bench<R: Runtime>(repo_url: &str, build_command: &str, source_dir: &str, 
 
         let (tx, rx) : (Sender<()>, Receiver<()>) = channel();
 
-        app.listen_global("stopbench", move|_| {
-           tx.send(()).unwrap();
+        let listener = app.listen_global("stopbench", move|_| {
+            println!("Received stopbench");
+            tx.send(()).unwrap();
         });
 
         loop {
 
             if rx.try_recv().is_ok() {
+                app.unlisten(listener);
                 break;
             }
             

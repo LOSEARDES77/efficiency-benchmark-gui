@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { appWindow } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/tauri';
-import { emit } from '@tauri-apps/api/event';
 
 export default function Stdout() {
   const [output, setOutput] = useState('');
@@ -23,7 +22,7 @@ export default function Stdout() {
 
   const stopBenchmark = () => {
     console.log('Stopping benchmark');
-    emit('stopbench')
+    appWindow.emit('stopbench')
   }
 
 
@@ -42,9 +41,11 @@ export default function Stdout() {
       <div className='output' id='scrollable'>
         <div>{output}</div>
       </div>
-
-      <Button variant="outlined" onClick={runBenchmark}>Run benchmark</Button>
-      <Button variant="outlined" onClick={stopBenchmark}>Stop benchmark</Button>
+      <div className='btn-container'>
+        <Button variant="outlined" className='runbtn' onClick={runBenchmark}>Run benchmark</Button>
+        <div className='spacer'></div>
+        <Button variant="outlined" className='stopbtn' onClick={stopBenchmark}>Stop benchmark</Button>
+      </div>
     </div>
   );
 }

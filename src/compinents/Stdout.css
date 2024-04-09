@@ -22,3 +22,12 @@
         font-family: inherit; /* Inherit font family */
     }
 }
+
+.btn-container{
+    display: block;
+}
+
+.spacer {
+    display: inline-block;
+    width: 25px;
+}
